@@ -1,6 +1,7 @@
 <div align="center">
 
-![](./assets/banner.png)
+![](./assets/banner-dark.png#gh-dark-mode-only)
+![](./assets/banner-light.png#gh-light-mode-only)
 
 </div>
 

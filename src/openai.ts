@@ -1,49 +1,74 @@
-import axios from 'axios'
+import type { CreateCompletionRequest } from '@fortaine/openai'
+import { Configuration, OpenAIApi } from '@fortaine/openai'
+import { streamCompletion } from '@fortaine/openai/stream'
 
 export const createOpenAIClient = (apiKey: string) => {
-    const client = axios.create({
-        baseURL: 'https://api.openai.com/v1',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-        },
+    const config = new Configuration({
+        apiKey,
     })
+    const openai = new OpenAIApi(config)
+
+    const getCompletion = async (
+        options: CreateCompletionRequest &
+        { onData?: (data: string) => void },
+    ) => {
+        const completion = await openai.createCompletion({
+            ...options,
+            stream: true,
+        }, { responseType: 'stream' })
+
+        let response = ''
+
+        for await (const data of streamCompletion(completion.data as any)) {
+            try {
+                const parsed = JSON.parse(data)
+                const { text } = parsed.choices[0]
+                response += text
+                if (options.onData) {
+                    options.onData(response)
+                }
+            }
+            catch (e) {
+                console.error(e)
+            }
+        }
+
+        return response
+    }
 
     const getCodeCompletion = async (
         fullCode: string,
         selectedCode: string,
         language: string,
+        onData: (data: string) => void,
     ) => {
-        // Replace the selected code with a placeholder
-        const input = fullCode.replace(selectedCode.trim(), `<<<REPLACE_START>>>\n${selectedCode.trim()}\n<<<REPLACE_END>>>`)
+        const prompt = fullCode.replace(
+            selectedCode.trim(),
+            `<<START>>\n${selectedCode.trim()}\n<<END>>`,
+        ).concat([
+            `We ONLY take the text wrapped in between <<START>> and <<END>> and translate to code in the language ${language}, without the wrappers and without comments.`,
+            'The converted code is following the structure from the code before and after it, and code conventions for the language.',
+            `The code is compliant with the ${language} language.`,
+            `The code inside the wrappers is converted to the following ${language} code:`,
+            '```\n',
+        ].join('\n'))
+        const max_tokens = Math.round(2048 - prompt.length / 3)
 
-        // Call the OpenAI API
-        const response = await client.post('/edits', {
-            model: 'code-davinci-edit-001',
-            input,
-            instruction: [
-                `Replace the pseudocode wrapped in between <<<REPLACE_START>>> and <<<REPLACE_END>>> to code in the language ${language}`,
-                'Keep the wrappers around the code generated from the pseudocode.',
-                'The converted code should follow the style of the code around it.',
-                'Be creative in understanding the syntax of the pseudocode.',
-            ].join(' '),
-            temperature: 0.5,
+        const completion = await getCompletion({
+            model: 'text-davinci-003',
+            prompt,
+            temperature: 0,
             top_p: 1,
             n: 1,
-        }, {
-            timeout: 10000,
-            timeoutErrorMessage: 'API_TIMEOUT',
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            stop: '```',
+            max_tokens,
+            onData,
         })
 
-        // Extract the code from the response
-        const code = response.data.choices[0].text
-        if (!code.includes('<<<REPLACE_START>>>')) {
-            throw new Error('CODE_NOT_REPLACED')
-        }
-        return code.split('<<<REPLACE_START>>>')[1]?.split('<<<REPLACE_END>>>')[0]?.trim()
+        return completion
     }
 
-    return {
-        getCodeCompletion,
-    }
+    return { getCompletion, getCodeCompletion }
 }

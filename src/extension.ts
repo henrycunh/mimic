@@ -39,7 +39,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Get the selected text
-        const { selection, selectedText } = getSelection(editor)
+        const { selection: originalSelection, selectedText } = getSelection(editor)
+        let selection = originalSelection
         const editorFullText = editor.document.getText()
 
         // Show an error message if there is no selected text
@@ -55,7 +56,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Animate lines while the code is being generated
         const { animateLines, setLineToLoading, setLineToError } = useDecoration(editor)
-        const stopLinesAnimation = animateLines(selection)
+        const {
+            stop: stopLinesAnimation,
+            updateSelection: updateLinesAnimationSelection,
+        } = animateLines(selection)
 
         // Add loading gutter icon
         const stopLineLoadingState = setLineToLoading(
@@ -65,9 +69,34 @@ export function activate(context: vscode.ExtensionContext) {
         )
 
         try {
-            const code = await getCodeCompletion(editorFullText, selectedText, language as string)
-            console.log({ code, editorFullText })
-
+            let changes = 0
+            const code = await getCodeCompletion(
+                editorFullText,
+                selectedText,
+                language as string,
+                (code) => {
+                    if (changes++ % 5 !== 0) {
+                        return
+                    }
+                    // Original cursor position at the start of the selection
+                    const originalCursorPosition = editor.document.positionAt(
+                        editor.document.offsetAt(originalSelection.start),
+                    )
+                    // Cursor position at the end of the generated code
+                    // this includes line breaks
+                    const cursorPosition = editor.document.positionAt(
+                        editor.document.offsetAt(originalSelection.start) + code.length,
+                    )
+                    // Replace the selected text with the generated code
+                    editor.edit((editBuilder) => {
+                        editBuilder.replace(selection, code)
+                    })
+                    // Set the selection to the generated code
+                    selection = new vscode.Selection(originalCursorPosition, cursorPosition)
+                    // Update the lines animation
+                    updateLinesAnimationSelection(selection)
+                },
+            )
             // Insert the code
             editor.edit((editBuilder) => {
                 editBuilder.replace(selection, code)
@@ -87,7 +116,8 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showErrorMessage('API timed out. Please try again later.')
                     return
                 }
-                vscode.window.showErrorMessage(`Error while converting text:\n${JSON.stringify(error.message)}`)
+                const errorDetails = error.response?.data ? JSON.stringify(error.response.data) : error.message
+                vscode.window.showErrorMessage(`Error while converting text:\n${errorDetails}`)
             }
             if (error.message === 'CODE_NOT_REPLACED') {
                 setLineToError(selection, 'Code could not replaced. Please try again.')

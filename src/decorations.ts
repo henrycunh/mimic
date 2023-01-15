@@ -12,11 +12,10 @@ export const useDecoration = (editor: vscode.TextEditor) => {
     }
 
     const animateLines = (selection: vscode.Selection) => {
-        // Change colors of the lines selected, on the whole line, animated
-        // The animation is a simple easeInOutCubic
-        let alpha = 0.1
+        let alpha = 0.2
         let direction = 1
         let lastDecorationType: vscode.TextEditorDecorationType | undefined
+        let usedSelection = selection
         const interval = setInterval(() => {
             const easeInOutCubic = (t: number): number => {
                 t /= 0.5
@@ -25,16 +24,16 @@ export const useDecoration = (editor: vscode.TextEditor) => {
                 }
                 return 0.5 * ((t -= 2) * t * t + 2)
             }
-            const decoration = setColorToSelection(`rgba(${constants.LineBackgroundColor}, ${easeInOutCubic(alpha)})`, selection)
+            const decoration = setColorToSelection(`rgba(${constants.LineBackgroundColor}, ${easeInOutCubic(alpha)})`, usedSelection)
             if (lastDecorationType) {
                 lastDecorationType.dispose()
             }
             lastDecorationType = decoration
             alpha += 0.004 * direction
-            if (alpha >= 0.3) {
+            if (alpha >= 0.5) {
                 direction = -1
             }
-            if (alpha <= 0.1) {
+            if (alpha <= 0.2) {
                 direction = 1
             }
         }, 10)
@@ -46,7 +45,11 @@ export const useDecoration = (editor: vscode.TextEditor) => {
             }
         }
 
-        return stop
+        const updateSelection = (newSelection: vscode.Selection) => {
+            usedSelection = newSelection
+        }
+
+        return { stop, updateSelection }
     }
 
     const setLineToLoading = (context: vscode.ExtensionContext, selection: vscode.Selection, message: string) => {

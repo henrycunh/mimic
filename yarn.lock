@@ -104,6 +104,15 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@fortaine/openai@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@fortaine/openai/-/openai-4.0.2.tgz#a5c2a41536a20ae5f057cb1dbcd047825c0743c2"
+  integrity sha512-cg2d4mu2iepCHxSvaD4g5O8Cvp2miNReZGNsnFtrZzPHHnLwsCv1CkFxhcivyLN8OmwTu0QltjNn1MC8fRwrEw==
+  dependencies:
+    axios "^1.2.0"
+    filedirname "^2.7.0"
+    form-data "^4.0.0"
+
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.8.tgz#03595ac2075a4dc0f191cc2131de14fbd7d410b9"
@@ -148,6 +157,11 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
+
+"@types/eventsource@^1.1.10":
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/@types/eventsource/-/eventsource-1.1.10.tgz#e085be22c913e893f83f5ace21e9c10f87cbf6d2"
+  integrity sha512-rYzRmJSnm44Xb7FICRXEjwe/26ZiiS+VMGmuD17PevMP56cGgLEsaM955sYQW0S+K7h+mPOL70vGf1hi4WDjVA==
 
 "@types/glob@^8.0.0":
   version "8.0.0"
@@ -444,7 +458,7 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-axios@^1.2.2:
+axios@^1.2.0:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.2.2.tgz#72681724c6e6a43a9fea860fc558127dbe32f9f1"
   integrity sha512-bz/J4gS2S3I7mpN/YZfGFTqhXTYzRho8Ay38w2otuuDR322KzFIWm/4W2K6gIwvWaws5n+mnb7D1lN9uD+QH6Q==
@@ -1281,6 +1295,11 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
+eventsource@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-2.0.2.tgz#76dfcc02930fb2ff339520b6d290da573a9e8508"
+  integrity sha512-IzUmBGPR3+oUG9dUeXynyNmf91/3zUSJg1lCktzKw47OXuhco54U3r9B7O4XX+Rb1Itm9OZ2b0RkTs10bICOxA==
+
 expand-template@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/expand-template/-/expand-template-2.0.3.tgz#6e14b3fcee0f3a6340ecb57d2e8918692052a47c"
@@ -1332,6 +1351,13 @@ file-entry-cache@^6.0.1:
   integrity sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==
   dependencies:
     flat-cache "^3.0.4"
+
+filedirname@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/filedirname/-/filedirname-2.7.0.tgz#aff98ce95590b89de5b502d51885095c01b1f36e"
+  integrity sha512-rw4NZ0XCpm4EeBp0NK2b1WUkCm/LSDg6mJR8ywV2JYvIiwe+fimMgwVxjgd94lbmx4rOOmxybeVHsB6SRNeaXQ==
+  dependencies:
+    get-current-line "^6.5.0"
 
 fill-range@^7.0.1:
   version "7.0.1"
@@ -1444,6 +1470,11 @@ get-caller-file@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
+
+get-current-line@^6.5.0:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/get-current-line/-/get-current-line-6.6.0.tgz#3b01ef83a1bc732e190755853516e13783d5ea93"
+  integrity sha512-9q/tqdL4+GMb0P28N/oSFruQE/8Sa1l9ew73AWS4j/KEMY32wD8+5QRB8LSTgt9HUZuLplmi8vc5dFFf5OvROA==
 
 get-intrinsic@^1.0.2, get-intrinsic@^1.1.1, get-intrinsic@^1.1.3:
   version "1.1.3"
