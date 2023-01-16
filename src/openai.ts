@@ -1,6 +1,7 @@
 import type { CreateCompletionRequest } from '@fortaine/openai'
 import { Configuration, OpenAIApi } from '@fortaine/openai'
 import { streamCompletion } from '@fortaine/openai/stream'
+import * as vscode from 'vscode'
 
 export const createOpenAIClient = (apiKey: string) => {
     const config = new Configuration({
@@ -57,10 +58,15 @@ export const createOpenAIClient = (apiKey: string) => {
             `The code inside the wrappers is converted to the following ${language} code:`,
             '```\n',
         ].join('\n'))
-        const max_tokens = Math.round(2048 - prompt.length / 3)
+        const userMaxTokens = Number(vscode.workspace.getConfiguration('mimic').get('maxTokens'))
+        const max_tokens = Math.round(userMaxTokens - (prompt.length / 3))
+        console.log('max_tokens', max_tokens, userMaxTokens)
+        if (max_tokens < 0) {
+            throw new Error('MAX_TOKENS_TOO_LOW')
+        }
 
         const completion = await getCompletion({
-            model: 'text-davinci-003',
+            model: vscode.workspace.getConfiguration('mimic').get('model') as string,
             prompt,
             temperature: 0,
             top_p: 1,

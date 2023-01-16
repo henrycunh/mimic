@@ -70,6 +70,8 @@ export function activate(context: vscode.ExtensionContext) {
 
         try {
             let changes = 0
+            const typingSpeed = Number(vscode.workspace.getConfiguration('mimic').get('generationTypingSpeed'))
+            const typingSpeedConverted = 12 - typingSpeed
             const code = await getCodeCompletion(
                 editorFullText,
                 selectedText,
@@ -86,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
                         + code.length,
                     )
 
-                    if (changes++ % 4 === 0) {
+                    if (changes++ % typingSpeedConverted === 0) {
                         // Replace the selected text with the generated code
                         editor.edit((editBuilder) => {
                             editBuilder.replace(selection, code)
@@ -98,11 +100,42 @@ export function activate(context: vscode.ExtensionContext) {
                     updateLinesAnimationSelection(selection)
                 },
             )
-            console.log(code)
             // Insert the code
             editor.edit((editBuilder) => {
                 editBuilder.replace(selection, code)
             })
+
+            // Show a webview with the generated code to the side
+            // TODO: Implement code explanations
+            // const panel = vscode.window.createWebviewPanel(
+            //     'mimicCodePreview',
+            //     'Mimic: Code Explanation',
+            //     vscode.ViewColumn.Beside,
+            //     {
+            //         enableScripts: true,
+            //     },
+            // )
+            // panel.webview.html = `
+            //         <html>
+            //             <head>
+            //                 <style>
+            //                     body {
+            //                         margin: 0;
+            //                         padding: 0;
+            //                         overflow: hidden;
+            //                     }
+            //                     iframe {
+            //                         width: 100%;
+            //                         height: 100%;
+            //                         border: none;
+            //                     }
+            //                 </style>
+            //             </head>
+            //             <body>
+            //                 <pre>${code}</pre>
+            //             </body>
+            //         </html>
+            //
         }
         catch (error: any) {
             if (error instanceof AxiosError) {
@@ -121,8 +154,29 @@ export function activate(context: vscode.ExtensionContext) {
                 const errorDetails = error.response?.data ? JSON.stringify(error.response.data) : error.message
                 vscode.window.showErrorMessage(`Error while converting text:\n${errorDetails}`)
             }
-            if (error.message === 'CODE_NOT_REPLACED') {
-                setLineToError(selection, 'Code could not replaced. Please try again.')
+
+            const errorMessageMap = {
+                CODE_NOT_REPLACED: 'Code could not replaced. Please try again.',
+                MAX_TOKENS_TOO_LOW: 'Max tokens too low. Please try again with a higher value.',
+            } as const
+
+            if (error.message in errorMessageMap) {
+                setLineToError(selection, errorMessageMap[error.message as keyof typeof errorMessageMap])
+            }
+            else {
+                setLineToError(selection, 'An unknown error occurred.')
+                vscode.window.showErrorMessage(`An unknown error occurred:\n${error.message}`)
+            }
+
+            if (error.message === 'MAX_TOKENS_TOO_LOW') {
+                vscode.window.showErrorMessage(
+                    'Max tokens too low. Please try again with a higher value.',
+                    'Open Settings',
+                ).then((value) => {
+                    if (value === 'Open Settings') {
+                        vscode.commands.executeCommand('workbench.action.openSettings', 'mimic.maxTokens')
+                    }
+                })
             }
             return
         }

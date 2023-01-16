@@ -2,7 +2,7 @@
   "name": "mimic",
   "displayName": "mimic",
   "description": "Convert any pseudocode to real code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "henrycunh",
   "repository": {
     "type": "git",
@@ -45,7 +45,36 @@
             "default": "",
             "markdownDescription": "The API key for your OpenAI account. You can get one at your [OpenAI dashboard](https://beta.openai.com/account/api-keys).",
             "order": 1
-          }
+          },
+          "mimic.model": {
+            "title": "Code generation model",
+            "type": "string",
+            "default": "text-davinci-003",
+            "markdownDescription": "The model to use for code generation. The currently supported models are:\n- `text-davinci-003` → The best, the most expensive\n- `code-davinci-002` → Competent at code replication, but not that smart\n- `code-cushman-001` → Really cheap, really fast, really dumb\n- `text-curie-001` → The cheapest, the fastest, the dumbest",
+            "enum": [
+              "text-davinci-003",
+              "code-davinci-002",
+              "code-cushman-001",
+              "text-curie-001"
+            ]
+          },
+          "mimic.maxTokens": {
+            "title": "Maximum tokens",
+            "type": "number",
+            "default": 2048,
+            "markdownDescription": "The maximum number of tokens to generate. The default is 2048, which is the maximum allowed by OpenAI.",
+            "order": 3,
+            "minimum": 100,
+            "maximum": 2048
+          },
+          "mimic.generationTypingSpeed": {
+            "title": "Generation typing speed",
+            "type": "number",
+            "default": 6,
+            "markdownDescription": "The typing speed of the generated code. 1 is the slowest, 10 is the fastest.",
+            "minimum": 1,
+            "maximum": 10
+          } 
         }
       }
     ]
