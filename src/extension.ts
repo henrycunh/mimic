@@ -74,29 +74,31 @@ export function activate(context: vscode.ExtensionContext) {
                 editorFullText,
                 selectedText,
                 language as string,
-                (code) => {
-                    if (changes++ % 5 !== 0) {
-                        return
-                    }
-                    // Original cursor position at the start of the selection
+                ({ response: code }) => {
+                    // Original cursor position at the start of the selection - 1
                     const originalCursorPosition = editor.document.positionAt(
-                        editor.document.offsetAt(originalSelection.start),
+                        editor.document.offsetAt(selection.start),
                     )
                     // Cursor position at the end of the generated code
                     // this includes line breaks
                     const cursorPosition = editor.document.positionAt(
-                        editor.document.offsetAt(originalSelection.start) + code.length,
+                        editor.document.offsetAt(originalSelection.start)
+                        + code.length,
                     )
-                    // Replace the selected text with the generated code
-                    editor.edit((editBuilder) => {
-                        editBuilder.replace(selection, code)
-                    })
+
+                    if (changes++ % 4 === 0) {
+                        // Replace the selected text with the generated code
+                        editor.edit((editBuilder) => {
+                            editBuilder.replace(selection, code)
+                        })
+                    }
                     // Set the selection to the generated code
                     selection = new vscode.Selection(originalCursorPosition, cursorPosition)
                     // Update the lines animation
                     updateLinesAnimationSelection(selection)
                 },
             )
+            console.log(code)
             // Insert the code
             editor.edit((editBuilder) => {
                 editBuilder.replace(selection, code)

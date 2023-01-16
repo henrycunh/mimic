@@ -10,7 +10,7 @@ export const createOpenAIClient = (apiKey: string) => {
 
     const getCompletion = async (
         options: CreateCompletionRequest &
-        { onData?: (data: string) => void },
+        { onData?: (data: { response: string; stop: boolean }) => void },
     ) => {
         const completion = await openai.createCompletion({
             ...options,
@@ -23,9 +23,14 @@ export const createOpenAIClient = (apiKey: string) => {
             try {
                 const parsed = JSON.parse(data)
                 const { text } = parsed.choices[0]
+                let stop = false
+                // Get stop reason
+                if (parsed.choices[0].finish_reason === 'stop') {
+                    stop = true
+                }
                 response += text
                 if (options.onData) {
-                    options.onData(response)
+                    options.onData({ response, stop })
                 }
             }
             catch (e) {
@@ -40,7 +45,7 @@ export const createOpenAIClient = (apiKey: string) => {
         fullCode: string,
         selectedCode: string,
         language: string,
-        onData: (data: string) => void,
+        onData: (data: { response: string; stop: boolean }) => void,
     ) => {
         const prompt = fullCode.replace(
             selectedCode.trim(),
@@ -48,7 +53,7 @@ export const createOpenAIClient = (apiKey: string) => {
         ).concat([
             `We ONLY take the text wrapped in between <<START>> and <<END>> and translate to code in the language ${language}, without the wrappers and without comments.`,
             'The converted code is following the structure from the code before and after it, and code conventions for the language.',
-            `The code is compliant with the ${language} language.`,
+            `The code is fully compliant with the ${language} language. It will compile fine.`,
             `The code inside the wrappers is converted to the following ${language} code:`,
             '```\n',
         ].join('\n'))
